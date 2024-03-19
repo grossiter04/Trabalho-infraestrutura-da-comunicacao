@@ -1,15 +1,18 @@
 from socket import *
+import time
 
 serverName = "localhost"
-serverPort = 1200
+serverPort = 12000
 
 clientSocket = socket(AF_INET, SOCK_DGRAM)
+while True:
+    message = input("Enter a lowercase sentence: ")
 
-message = input("Enter a lowercase sentence: ")
+    clientSocket.sendto(message.encode(), (serverName, serverPort))
 
-clientSocket.sendto(message.encode(), (serverName, serverPort))
+    modifiedMessage, serverAddress = clientSocket.recvfrom(2048)
 
-modifiedMessage, serverAddress = clientSocket.recvfrom(2048)
-print(modifiedMessage.decode())
+    print(modifiedMessage.decode())
+    time.sleep(1)
 
-clientSocket.close()
+# clientSocket.close()
