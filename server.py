@@ -1,5 +1,17 @@
 from socket import *
 import hashlib
+import pickle
+from random import random
+
+def checksum(data):
+    # Converter todas as strings em bytes antes de calcular a soma
+    data_bytes = [bytes(element, 'utf-8') if isinstance(element, str) else bytes([element]) for element in data]
+    # Somar os bytes usando operadores binários
+    result = 0
+    for byte_data in data_bytes:
+        result += int.from_bytes(byte_data, byteorder='big')
+    return result & 0xFFFFFFFF
+
 
 serverPort = 12000
 
@@ -12,16 +24,30 @@ print("The server is ready to receive!\n")
 while True:
     
     packet, clientAddress = serverSocket.recvfrom(2048)
-    print("Received packet:", packet.decode())
+    print("Received packet:", packet)
     print("From:", clientAddress, "\n")
+
+    received_data = pickle.loads(packet)
+    print("Received data:", received_data)
+
+    print("Checksum calculada:", checksum(received_data[:-1][-1]))
     
-    # print(packet)
+    print("Checksum esperada:", received_data[-1])
+    
+    if checksum(received_data[:-1][-1]) == received_data[-1]:
+        received_message = received_data[0]
 
-    received_message = packet.decode()
+        # Simular perda de pacotes com probabilidade de 1%
+        if random() < 0.01:
+            print("Pacote perdido!")
+            break
 
-    modifiedMessage = received_message.upper()
+        else:
+            modifiedMessage = received_message.upper()
+            response_data = [modifiedMessage, checksum([modifiedMessage])]
+            serverSocket.sendto(pickle.dumps(response_data), clientAddress)
 
-    serverSocket.sendto(modifiedMessage.encode(), clientAddress)
-
-    print("Message sent to", clientAddress)
-    print("Message:", modifiedMessage, "\n")
+            print("Message sent to", clientAddress)
+            print("Message:", modifiedMessage, "\n")
+    else:
+        print("Erro na soma de verificação. Requisitando reenvio...")
