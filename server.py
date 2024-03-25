@@ -37,17 +37,16 @@ while True:
     if checksum(received_data[:-1][-1]) == received_data[-1]:
         received_message = received_data[0]
 
-        # Simular perda de pacotes com probabilidade de 1%
-        if random() < 0.01:
-            print("Pacote perdido!")
-            break
+        modifiedMessage = received_message.upper()
+        response_data = [modifiedMessage, checksum([modifiedMessage])]
+        serverSocket.sendto(pickle.dumps(response_data), clientAddress)
 
-        else:
-            modifiedMessage = received_message.upper()
-            response_data = [modifiedMessage, checksum([modifiedMessage])]
-            serverSocket.sendto(pickle.dumps(response_data), clientAddress)
-
-            print("Message sent to", clientAddress)
-            print("Message:", modifiedMessage, "\n")
+        print("Message sent to", clientAddress)
+        print("Message:", modifiedMessage, "\n")
     else:
         print("Erro na soma de verificação. Requisitando reenvio...")
+        errorMessage = "ERROR"
+        response_data = [errorMessage, checksum([errorMessage])]
+        serverSocket.sendto(pickle.dumps(response_data), clientAddress)
+        print("Message sent to", clientAddress)
+        print("Message:", errorMessage, "\n")
