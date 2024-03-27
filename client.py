@@ -34,6 +34,16 @@ while True:
 
     clientSocket.sendto(pickle.dumps(data_to_send), (serverName, serverPort))
 
+    # Recebendo mensagem ACK - reconhecimento
+    ack, serverAddress = clientSocket.recvfrom(2048)
+    ackk = pickle.loads(ack)
+    print(f"{ackk} recebido de", serverAddress)
+
+    if ackk != "ACK":
+        print("ACK não recebido.")
+        timer.cancel()
+        continue
+
     response_data, serverAddress = clientSocket.recvfrom(2048)
 
     # Pare o temporizador quando receber a resposta

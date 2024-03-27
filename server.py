@@ -24,6 +24,12 @@ while True:
     print("Pacote recebido:", packet)
     print("De:", clientAddress, "\n")
 
+    # Enviando mensagem ACK - reconhecimento
+
+    ack = "ACK"
+    serverSocket.sendto(pickle.dumps(ack), clientAddress)
+    print("ACK enviado para", clientAddress)
+
     timer = threading.Timer(5, timeout_handler)  # Define um tempo limite de 5 segundos
     timer.start()
 
