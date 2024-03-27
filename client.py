@@ -1,6 +1,7 @@
 from socket import *
 import pickle
 import time
+import threading 
 
 # Função para calcular a soma de verificação
 def checksum(data):
@@ -12,20 +13,31 @@ def checksum(data):
         result += int.from_bytes(byte_data, byteorder='big')
     return result & 0xFFFFFFFF
 
+def timeout_handler():
+    print("Tempo limite excedido. Encerrando conexão.")
+    clientSocket.close()
 
 serverName = "localhost"
 serverPort = 12000
 
 clientSocket = socket(AF_INET, SOCK_DGRAM)
+
 while True:
     message = input("Enter a lowercase sentence: ")
     
     message_checksum = checksum(message.encode())
 
     data_to_send = [message, message_checksum]
+    
+    timer = threading.Timer(5, timeout_handler)
+    timer.start()
+
     clientSocket.sendto(pickle.dumps(data_to_send), (serverName, serverPort))
 
     response_data, serverAddress = clientSocket.recvfrom(2048)
+
+    # Pare o temporizador quando receber a resposta
+    timer.cancel()
 
     # Separa a mensagem e a soma de verificação
     modifiedMessage, checksum_received = pickle.loads(response_data)
