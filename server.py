@@ -38,7 +38,7 @@ while True:
         received_message = received_data[0]
 
         modifiedMessage = received_message.upper()
-        response_data = [modifiedMessage, checksum([modifiedMessage])]
+        response_data = [modifiedMessage, checksum(modifiedMessage)]
         serverSocket.sendto(pickle.dumps(response_data), clientAddress)
 
         print("Message sent to", clientAddress)
@@ -46,7 +46,7 @@ while True:
     else:
         print("Erro na soma de verificação. Requisitando reenvio...")
         errorMessage = "ERROR"
-        response_data = [errorMessage, checksum([errorMessage])]
+        response_data = [errorMessage, checksum(errorMessage)]
         serverSocket.sendto(pickle.dumps(response_data), clientAddress)
         print("Message sent to", clientAddress)
         print("Message:", errorMessage, "\n")

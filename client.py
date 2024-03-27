@@ -30,16 +30,16 @@ while True:
     # Separa a mensagem e a soma de verificação
     modifiedMessage, checksum_received = pickle.loads(response_data)
 
-    if (modifiedMessage == "ERROR"):
+    while (modifiedMessage == "ERROR"):
         # Reenviando mensagem
         print("Erro na soma de verificação. Reenviando mensagem...")
         data_to_send = [message, message_checksum]
         clientSocket.sendto(pickle.dumps(data_to_send), (serverName, serverPort))
-    else:
-        print("Checksum recebida:", checksum_received)
-        print("Checksum calculada:", checksum(modifiedMessage.encode()))
+        response_data, serverAddress = clientSocket.recvfrom(2048)
+        modifiedMessage, checksum_received = pickle.loads(response_data)
     
-
-    print(modifiedMessage)
+    print("Checksum recebida:", checksum_received)
+    print("Checksum calculada:", checksum(modifiedMessage.encode()))
+    print("Mensagem recebida: ", modifiedMessage, "\n")
 
     time.sleep(1)
