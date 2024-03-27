@@ -22,7 +22,7 @@ while True:
     
     message_checksum = checksum(message.encode())
 
-    data_to_send = [message, 12]
+    data_to_send = [message, message_checksum]
     clientSocket.sendto(pickle.dumps(data_to_send), (serverName, serverPort))
 
     response_data, serverAddress = clientSocket.recvfrom(2048)
