@@ -1,6 +1,8 @@
 from socket import *
 import pickle
-import threading  # Importe a biblioteca threading
+import threading
+
+expected_seq_number = 0
 
 def checksum(data):
     data_bytes = [bytes(element, 'utf-8') if isinstance(element, str) else bytes([element]) for element in data]
@@ -13,40 +15,49 @@ def timeout_handler():
     print("Tempo limite excedido. Encerrando conexão.")
     serverSocket.close()
 
+def handle_client(packet):
+    global expected_seq_number
+    received_data = pickle.loads(packet)
+    seq_number, received_message, received_checksum = received_data
+
+    print(f"Sequência esperada: {expected_seq_number}, Sequência recebida: {seq_number}")
+    
+    if seq_number != expected_seq_number or checksum(received_message.encode()) != received_checksum:
+        # Erro de sequência ou checksum
+        return False
+
+    expected_seq_number += 1  # Atualiza o número de sequência esperado para o próximo pacote
+    return received_message.upper()  # Retorna a mensagem modificada em caso de sucesso
+
 serverPort = 12000
 serverSocket = socket(AF_INET, SOCK_DGRAM)
 serverSocket.bind(('', serverPort))
-
 print("O servidor está pronto para receber!\n")
 
 while True:
     packet, clientAddress = serverSocket.recvfrom(2048)
-    print("Pacote recebido:", packet)
-    print("De:", clientAddress, "\n")
-
-    timer = threading.Timer(5, timeout_handler)  # Define um tempo limite de 5 segundos
+    
+    timer = threading.Timer(5, timeout_handler)
     timer.start()
-
-    received_data = pickle.loads(packet)
-    print("Dados recebidos:", received_data)
-
-    print("Checksum calculada:", checksum(received_data[:-1][-1]))
-    print("Checksum esperada:", received_data[-1])
-
-    # Pare o temporizador após receber os dados do cliente
-    timer.cancel()
-
-    if checksum(received_data[:-1][-1]) == received_data[-1]:
-        received_message = received_data[0]
-        modifiedMessage = received_message.upper()
-        response_data = [modifiedMessage, checksum(modifiedMessage)]
-        serverSocket.sendto(pickle.dumps(response_data), clientAddress)
-        print("Mensagem enviada para", clientAddress)
-        print("Mensagem:", modifiedMessage, "\n")
+    
+    response = handle_client(packet)
+    
+    if response:
+        # Envio de ACK positivo + mensagem modificada
+        response_data = [expected_seq_number - 1, response, checksum(response.encode())]
+        ack = "ACK"
     else:
-        print("Erro na soma de verificação. Requisitando reenvio...")
-        errorMessage = "ERROR"
-        response_data = [errorMessage, checksum(errorMessage)]
+        # Envio de NACK em caso de erro
+        response_data = [expected_seq_number - 1, "ERROR", 0]
+        ack = "NACK"
+    
+    # Primeiro, enviar o ACK ou NACK
+    serverSocket.sendto(pickle.dumps(ack), clientAddress)
+
+
+    if ack == "ACK":        # Em seguida, enviar os dados de resposta
         serverSocket.sendto(pickle.dumps(response_data), clientAddress)
-        print("Mensagem enviada para", clientAddress)
-        print("Mensagem:", errorMessage, "\n")
+    
+    print(f"{ack} enviado para {clientAddress}")
+    
+    timer.cancel()
