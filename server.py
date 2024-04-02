@@ -2,9 +2,25 @@ from socket import *
 import pickle
 import threading
 
+
+# Requisitos que faltam:
+# - cliente deve ser capaz de se conectar ao servidor via IP
+# - Reconhecimento - falta terminar
+# - Reconhecimento negativo
+# - Janela, paralelismo
+# - simular melhor os erros e perdas
+# - Deve ser possível enviar pacotes da camada de aplicação isolados a partir do
+#    cliente ou lotes com destino ao servidor. O servidor poderá ser configurado para
+#    confirmar a recepção individual dessas mensagens ou em grupo (i.e. deve
+#    aceitar as duas configurações);
+# - Relatorio + manual de uso
+# - todos os grupos que implementarem algum método de
+#    checagem de integridade receberão 0,5 pontos adicionais na prova.
+
 expected_seq_number = 0
 
-def checksum(data):
+# checa a proria integridade da mensagem
+def checksum(data): 
     data_bytes = [bytes(element, 'utf-8') if isinstance(element, str) else bytes([element]) for element in data]
     result = 0
     for byte_data in data_bytes:
@@ -59,7 +75,7 @@ while True:
 
     print("Dados recebidos:", response_data, '\n')
 
-    print("Checksum calculada:", checksum(response_data[:-1][-1]))
+    print("Checksum calculada:", response_data[-1])
     print("Checksum esperada:", response_data[-1], '\n')
 
     if ack == "ACK":        # Em seguida, enviar os dados de resposta
