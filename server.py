@@ -20,7 +20,7 @@ def handle_client(packet):
     received_data = pickle.loads(packet)
     seq_number, received_message, received_checksum = received_data
 
-    print(f"Sequência esperada: {expected_seq_number}, Sequência recebida: {seq_number}")
+    print(f"Sequência esperada: {expected_seq_number}, Sequência recebida: {seq_number}\n")
     
     if seq_number != expected_seq_number or checksum(received_message.encode()) != received_checksum:
         # Erro de sequência ou checksum
@@ -37,6 +37,9 @@ print("O servidor está pronto para receber!\n")
 while True:
     packet, clientAddress = serverSocket.recvfrom(2048)
     
+    print("Pacote recebido:", packet)
+    print("De:", clientAddress, "\n")
+
     timer = threading.Timer(5, timeout_handler)
     timer.start()
     
@@ -54,6 +57,10 @@ while True:
     # Primeiro, enviar o ACK ou NACK
     serverSocket.sendto(pickle.dumps(ack), clientAddress)
 
+    print("Dados recebidos:", response_data, '\n')
+
+    print("Checksum calculada:", checksum(response_data[:-1][-1]))
+    print("Checksum esperada:", response_data[-1], '\n')
 
     if ack == "ACK":        # Em seguida, enviar os dados de resposta
         serverSocket.sendto(pickle.dumps(response_data), clientAddress)
