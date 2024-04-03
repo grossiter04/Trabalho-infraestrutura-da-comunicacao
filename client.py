@@ -14,10 +14,13 @@ def timeout_handler():
     print("Tempo limite excedido. Encerrando conexão.")
     clientSocket.close()
 
-serverName = "localhost"
+
 serverPort = 12000
 clientSocket = socket(AF_INET, SOCK_DGRAM)
 seq_number = 0
+
+
+serverName = input("Digite o endereço IP do servidor (ou 'localhost' para se conectar localmente): ")
 
 while True:
     message = input("Enter a lowercase sentence: ")

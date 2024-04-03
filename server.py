@@ -2,20 +2,16 @@ from socket import *
 import pickle
 import threading
 
-
 # Requisitos que faltam:
-# - cliente deve ser capaz de se conectar ao servidor via IP
-# - Reconhecimento - falta terminar
-# - Reconhecimento negativo
-# - Janela, paralelismo
-# - simular melhor os erros e perdas
+# - temporizador precisa reenviar a mensagem - paixao e mega
+# - Reconhecimento negativo - falta terminar - carlos e rossiter
+# - Janela, paralelismo - paixa e mega
+# - simular melhor os erros e perdas - pires e danilo
 # - Deve ser possível enviar pacotes da camada de aplicação isolados a partir do
 #    cliente ou lotes com destino ao servidor. O servidor poderá ser configurado para
 #    confirmar a recepção individual dessas mensagens ou em grupo (i.e. deve
-#    aceitar as duas configurações);
-# - Relatorio + manual de uso
-# - todos os grupos que implementarem algum método de
-#    checagem de integridade receberão 0,5 pontos adicionais na prova.
+#    aceitar as duas configurações); - quem terminar sua parte vai ajudando aqui
+# - Relatorio + manual de uso - qualquer um
 
 expected_seq_number = 0
 
@@ -47,12 +43,11 @@ def handle_client(packet):
 
 serverPort = 12000
 serverSocket = socket(AF_INET, SOCK_DGRAM)
-serverSocket.bind(('', serverPort))
+serverSocket.bind(('0.0.0.0', serverPort))
 print("O servidor está pronto para receber!\n")
 
 while True:
     packet, clientAddress = serverSocket.recvfrom(2048)
-    
     print("Pacote recebido:", packet)
     print("De:", clientAddress, "\n")
 
