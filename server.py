@@ -6,7 +6,6 @@ import threading
 # - temporizador precisa reenviar a mensagem - paixao e mega
 # - Reconhecimento negativo - falta terminar - carlos e rossiter
 # - Janela, paralelismo - paixa e mega
-# - simular melhor os erros e perdas - pires e danilo
 # - Deve ser possível enviar pacotes da camada de aplicação isolados a partir do
 #    cliente ou lotes com destino ao servidor. O servidor poderá ser configurado para
 #    confirmar a recepção individual dessas mensagens ou em grupo (i.e. deve
