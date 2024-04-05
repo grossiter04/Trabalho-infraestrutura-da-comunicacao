@@ -39,11 +39,12 @@ while True:
     ack, serverAddress = clientSocket.recvfrom(2048)
     ackk = pickle.loads(ack)
   
-    if ackk != "ACK":
-        print("ACK não recebido.")
-        timer.cancel()
-        continue
-    else:
+    while ackk != "ACK":
+        print("ACK não recebido. Reenviando mensagem.\n")
+        clientSocket.sendto(pickle.dumps(data_to_send), (serverName, serverPort))
+        ack, serverAddress = clientSocket.recvfrom(2048)
+        ackk = pickle.loads(ack)
+    if ackk == "ACK":
         print(f"{ackk} recebido.")
 
     response_data, serverAddress = clientSocket.recvfrom(2048)
