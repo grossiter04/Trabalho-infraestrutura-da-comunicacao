@@ -1,3 +1,4 @@
+
 from socket import *
 import pickle
 import time
@@ -11,19 +12,16 @@ def checksum(data):
     return result & 0xFFFFFFFF
 
 def timeout_handler():
-    print("Tempo limite excedido. Encerrando conexão.")
-    clientSocket.close()
-
+    print("Tempo limite excedido. Reenviando mensagem.")
+    clientSocket.sendto(pickle.dumps("TIMEOUT"), (serverName, serverPort))
 
 serverPort = 12000
 clientSocket = socket(AF_INET, SOCK_DGRAM)
 seq_number = 0
-
-
 serverName = input("Digite o endereço IP do servidor (ou 'localhost' para se conectar localmente): ")
 
 while True:
-    message = input("Enter a lowercase sentence: ")
+    message = input("Digite uma frase em minúsculas: ")
     if not message:
         break
     

@@ -13,15 +13,14 @@ import threading
 # - Relatorio + manual de uso - qualquer um
 
 expected_seq_number = 0
-
 first_time = True
 
-# checa a proria integridade da mensagem
+# Checa a própria integridade da mensagem
 def checksum(data): 
     global first_time
     data_bytes = [bytes(element, 'utf-8') if isinstance(element, str) else bytes([element]) for element in data]
     result = 0
-    # Simulating a error in checksum, changing the first byte
+    # Simulando um erro no checksum, alterando o primeiro byte
     if first_time:
         data_bytes[0] = bytes([data_bytes[0][0] + 1])
         first_time = False
@@ -29,11 +28,11 @@ def checksum(data):
         result += int.from_bytes(byte_data, byteorder='big')
     return result & 0xFFFFFFFF
 
-def timeout_handler():
-    print("Tempo limite excedido. Encerrando conexão.")
-    serverSocket.close()
+def timeout_handler(client_address):
+    print("Tempo limite excedido. Reenviando mensagem.")
+    serverSocket.sendto(pickle.dumps("TIMEOUT"), client_address)
 
-def handle_client(packet):
+def handle_client(packet, client_address):
     global expected_seq_number
     received_data = pickle.loads(packet)
     seq_number, received_message, received_checksum = received_data
@@ -60,10 +59,10 @@ while True:
     print("Pacote recebido:", packet)
     print("De:", clientAddress, "\n")
 
-    timer = threading.Timer(5, timeout_handler)
+    timer = threading.Timer(5, timeout_handler, args=[clientAddress])
     timer.start()
     
-    response = handle_client(packet)
+    response = handle_client(packet, clientAddress)
     
     if response:
         # Envio de ACK positivo + mensagem modificada
@@ -79,7 +78,7 @@ while True:
 
     print("Dados enviados:", response_data, '\n')
 
-    if ack == "ACK":        # Em seguida, enviar os dados de resposta
+    if ack == "ACK":  # Em seguida, enviar os dados de resposta
         serverSocket.sendto(pickle.dumps(response_data), clientAddress)
     
     print(f"{ack} enviado para {clientAddress}")
