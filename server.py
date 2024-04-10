@@ -54,6 +54,8 @@ serverSocket = socket(AF_INET, SOCK_DGRAM)
 serverSocket.bind(('0.0.0.0', serverPort))
 print("O servidor está pronto para receber!\n")
 
+message = ''
+
 while True:
     packet, clientAddress = serverSocket.recvfrom(2048)
     print("Pacote recebido:", packet)
@@ -67,6 +69,8 @@ while True:
     if response:
         # Envio de ACK positivo + mensagem modificada
         response_data = [expected_seq_number - 1, response, checksum(response.encode())]
+        message += response
+        print(message)
         ack = "ACK"
     else:
         # Envio de NACK em caso de erro
