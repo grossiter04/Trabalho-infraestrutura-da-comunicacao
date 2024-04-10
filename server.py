@@ -15,6 +15,10 @@ import threading
 expected_seq_number = 0
 first_time = True
 
+def timer_window_function():
+    timer_window = threading.Timer(5, timer_window_function)
+    timer_window.start()
+
 # Checa a própria integridade da mensagem
 def checksum(data): 
     global first_time
@@ -56,7 +60,31 @@ print("O servidor está pronto para receber!\n")
 
 message = ''
 
+# temporizador de 1 segundo
+timer_window = threading.Timer(5, timer_window_function)
+timer_window.start()
+
+# lista de mensagens recebidas onde cada indíce é uma string de pacote
+received_messages = []
+last_sequence_number = 0
+
 while True:
+    # se o timer der 1 segundo, é porque recebeu todos os pacotes de uma mensagem
+    if timer_window.finished.is_set():
+        print("Temporizador de janela de 1 segundo atingido.")
+        timer_window = threading.Timer(5, timer_window_function)
+        timer_window.start()
+        # zerando a variável message para receber a próxima mensagem
+        message = ''
+        print('Message antiga: ', message)
+        print('Last sequence number:', last_sequence_number)
+        for i in range(last_sequence_number, expected_seq_number):
+            print('Last sequence number:', i)
+            message += received_messages[i]
+        last_sequence_number = expected_seq_number
+        print('Expected sequence number:', expected_seq_number)
+        print("Mensagem completa:", message)
+
     packet, clientAddress = serverSocket.recvfrom(2048)
     print("Pacote recebido:", packet)
     print("De:", clientAddress, "\n")
@@ -69,14 +97,13 @@ while True:
     if response:
         # Envio de ACK positivo + mensagem modificada
         response_data = [expected_seq_number - 1, response, checksum(response.encode())]
-        message += response
-        print(message)
+        received_messages.append(response)
         ack = "ACK"
     else:
         # Envio de NACK em caso de erro
         response_data = [expected_seq_number - 1, "ERROR", 0]
         ack = "NACK"
-    
+
     # Primeiro, enviar o ACK ou NACK
     serverSocket.sendto(pickle.dumps(ack), clientAddress)
 
@@ -88,3 +115,4 @@ while True:
     print(f"{ack} enviado para {clientAddress}")
     
     timer.cancel()
+
