@@ -25,8 +25,9 @@ serverName = input("Digite o endereço IP do servidor (ou 'localhost' para se co
 
 while True:
     message = input("Digite uma frase em minúsculas: ")
-    if not message:
-        break
+
+    config = input("Digite 0 para enviar em lotes e 1 para enviar isoladamente. ")
+
     
     # Dividindo a mensagem em pacotes de 3 caracteres cada
     packets = divide_into_packets(message)

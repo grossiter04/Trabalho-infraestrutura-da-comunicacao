@@ -3,8 +3,8 @@ import pickle
 import threading
 
 # Requisitos que faltam:
-# - temporizador precisa reenviar a mensagem - paixao e mega
-# - Reconhecimento negativo - falta terminar - carlos e rossiter
+# - temporizador precisa reenviar a mensagem - paixao e mega - aparentemente feito
+# - Reconhecimento negativo - carlos e rossiter - feito
 # - Janela, paralelismo - paixa e mega
 # - Deve ser possível enviar pacotes da camada de aplicação isolados a partir do
 #    cliente ou lotes com destino ao servidor. O servidor poderá ser configurado para
@@ -14,6 +14,7 @@ import threading
 
 expected_seq_number = 0
 first_time = True
+second_time = True
 
 def timer_window_function():
     timer_window = threading.Timer(5, timer_window_function)
@@ -38,16 +39,27 @@ def timeout_handler(client_address):
 
 def handle_client(packet, client_address):
     global expected_seq_number
+    global second_time
     received_data = pickle.loads(packet)
     seq_number, received_message, received_checksum = received_data
+
+    # Simulando numero de sequencia incorreto
+    if second_time and first_time == False:
+        seq_number = seq_number + 1
+        second_time = False
+
     calculated_checksum = checksum(received_message.encode())
 
     print(f"Sequência esperada: {expected_seq_number}, Sequência recebida: {seq_number}\n")
     print(f"Checksum esperado: {received_checksum}, Checksum recebido: {calculated_checksum}\n")
     
-    if seq_number != expected_seq_number or calculated_checksum != received_checksum:
+    if seq_number != expected_seq_number:
         # Erro de sequência ou checksum
-        print("Erro na soma de verificação ou número de sequência. Enviando NACK.\n")
+        print("Erro de sequência. Enviando NACK.\n")
+        return False
+    
+    if(calculated_checksum != received_checksum):
+        print("Erro na soma de verificação. Enviando NACK.\n")
         return False
 
     expected_seq_number += 1  # Atualiza o número de sequência esperado para o próximo pacote
@@ -70,8 +82,8 @@ last_sequence_number = 0
 
 while True:
     # se o timer der 1 segundo, é porque recebeu todos os pacotes de uma mensagem
-    if timer_window.finished.is_set():
-        print("Temporizador de janela de 1 segundo atingido.")
+    '''if timer_window.finished.is_set():
+        print("Temporizador de janela de 5 segundos atingido.")
         timer_window = threading.Timer(5, timer_window_function)
         timer_window.start()
         # zerando a variável message para receber a próxima mensagem
@@ -83,7 +95,7 @@ while True:
             message += received_messages[i]
         last_sequence_number = expected_seq_number
         print('Expected sequence number:', expected_seq_number)
-        print("Mensagem completa:", message)
+        print("Mensagem completa:", message)'''
 
     packet, clientAddress = serverSocket.recvfrom(2048)
     print("Pacote recebido:", packet)
