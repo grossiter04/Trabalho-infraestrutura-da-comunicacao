@@ -16,10 +16,6 @@ expected_seq_number = 0
 first_time = True
 second_time = True
 
-def timer_window_function():
-    timer_window = threading.Timer(5, timer_window_function)
-    timer_window.start()
-
 # Checa a própria integridade da mensagem
 def checksum(data): 
     global first_time
@@ -72,31 +68,13 @@ print("O servidor está pronto para receber!\n")
 
 message = ''
 
-# temporizador de 1 segundo
-timer_window = threading.Timer(5, timer_window_function)
-timer_window.start()
-
 # lista de mensagens recebidas onde cada indíce é uma string de pacote
 received_messages = []
 last_sequence_number = 0
 
-while True:
-    # se o timer der 1 segundo, é porque recebeu todos os pacotes de uma mensagem
-    '''if timer_window.finished.is_set():
-        print("Temporizador de janela de 5 segundos atingido.")
-        timer_window = threading.Timer(5, timer_window_function)
-        timer_window.start()
-        # zerando a variável message para receber a próxima mensagem
-        message = ''
-        print('Message antiga: ', message)
-        print('Last sequence number:', last_sequence_number)
-        for i in range(last_sequence_number, expected_seq_number):
-            print('Last sequence number:', i)
-            message += received_messages[i]
-        last_sequence_number = expected_seq_number
-        print('Expected sequence number:', expected_seq_number)
-        print("Mensagem completa:", message)'''
+config = input("Digite 0 para recepção individual e 1 para recepção em grupo. ")
 
+while True:
     packet, clientAddress = serverSocket.recvfrom(2048)
     print("Pacote recebido:", packet)
     print("De:", clientAddress, "\n")
@@ -116,15 +94,35 @@ while True:
         response_data = [expected_seq_number - 1, "ERROR", 0]
         ack = "NACK"
 
+    print("Mensagem recebida:", response, "\n")
+
+    # se o último caracter recebido for um '/0', a mensagem está completa
+    if response != False and '\0' in response:
+        print("Último pacote recebido. Mensagem completa.\n")
+
+        # zerando a variável message para receber a próxima mensagem
+        message = ''
+
+        for i in range(last_sequence_number, expected_seq_number):
+            print('Last sequence number:', i)
+            message += received_messages[i]
+        last_sequence_number = expected_seq_number
+        print('Expected sequence number:', expected_seq_number)
+        print("Mensagem completa:", message)
+
     # Primeiro, enviar o ACK ou NACK
     serverSocket.sendto(pickle.dumps(ack), clientAddress)
 
     print("Dados enviados:", response_data, '\n')
 
-    if ack == "ACK":  # Em seguida, enviar os dados de resposta
+    if ack == "ACK" and config == '0':  # Configuração 0, envia ACK para cada pacote
         serverSocket.sendto(pickle.dumps(response_data), clientAddress)
-    
-    print(f"{ack} enviado para {clientAddress}")
-    
+        print(f"{ack} enviado para {clientAddress}")
+
+    if ack == "ACK" and config == '1':  # Configuração 1, envia ACK para o último pacote
+        if '\0' in response:
+            serverSocket.sendto(pickle.dumps(response_data), clientAddress)
+            print(f"{ack} enviado para {clientAddress}")
+            
     timer.cancel()
 
