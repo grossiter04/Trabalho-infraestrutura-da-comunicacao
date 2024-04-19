@@ -1,9 +1,10 @@
 # Trabalho Infraestrutura da Comunicação
-Repositório direcionado ao projeto da disciplina de Infraestrutua de Redes;<br>
+Repositório direcionado ao projeto da disciplina de Infraestrutura de Redes;<br>
 Desenvolvido em linguagem Python, compatível com sistemas Unix e Windows;<br>
 <img align="center" alt="Linux" height="40" width="50" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg">
 <img align="center" alt="Windows" height="40" width="50" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/windows8/windows8-original.svg">
 <img align="center" alt="Python" height="40" width="50" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg">
+<img align="center" alt="Apple" height="40" width="50" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apple/apple-original.svg">
 
 ## COMO RODAR
 - Primeiramente, devemos abrir o terminal, e navegar até o diretório do projeto.
