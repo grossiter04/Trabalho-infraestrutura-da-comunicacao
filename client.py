@@ -22,6 +22,7 @@ serverPort = 12000
 clientSocket = socket(AF_INET, SOCK_DGRAM)
 seq_number = 0
 serverName = input("Digite o endereço IP do servidor (ou 'localhost' para se conectar localmente): ")
+config = input("Digite 0 para recepção individual e 1 para recepção em grupo. ")
 
 while True:
     message = input("Digite uma frase em minúsculas: ")
@@ -31,41 +32,77 @@ while True:
     # Dividindo a mensagem em pacotes de 3 caracteres cada
     packets = divide_into_packets(message)
 
-    for packet in packets:
-        message_checksum = checksum(packet.encode())
-        data_to_send = [seq_number, packet, message_checksum]
-        
-        timer = threading.Timer(5, timeout_handler)
-        timer.start()
-        
-        clientSocket.sendto(pickle.dumps(data_to_send), (serverName, serverPort))
-
-        # Recebendo mensagem ACK - reconhecimento
-        ack, serverAddress = clientSocket.recvfrom(2048)
-        ackk = pickle.loads(ack)
-      
-        while ackk != "ACK":
-            print("ACK não recebido. Reenviando pacote.\n")
-            clientSocket.sendto(pickle.dumps(data_to_send), (serverName, serverPort))
-            ack, serverAddress = clientSocket.recvfrom(2048)
-            ackk = pickle.loads(ack)
-        if ackk == "ACK":
-            print(f"{ackk} recebido.")
-
-        response_data, serverAddress = clientSocket.recvfrom(2048)
-
-        timer.cancel()
-        
-        seq_number_received, modifiedMessage, checksum_received = pickle.loads(response_data)
-        
-        if seq_number_received == seq_number:
-            print("Checksum recebida:", checksum_received)
-            print("Checksum calculada:", checksum(modifiedMessage.encode()))
-            print("Pacote recebido:", modifiedMessage, "\n")
+    if config == '0':
+        for packet in packets:
+            message_checksum = checksum(packet.encode())
+            data_to_send = [seq_number, packet, message_checksum]
             
-            if modifiedMessage != "ERROR":
-                seq_number += 1
-        else:
-            print("Erro na soma de verificação ou número de sequência. Pacote ignorado.")
+            timer = threading.Timer(5, timeout_handler)
+            timer.start()
+            
+            clientSocket.sendto(pickle.dumps(data_to_send), (serverName, serverPort))
+
+            # Recebendo mensagem ACK - reconhecimento
+            ack, serverAddress = clientSocket.recvfrom(2048)
+            ack_data = pickle.loads(ack)
+
+            checksum_received = ack_data[2]
+            print("Checksum recebida:", checksum_received)
+            seq_number_received = ack_data[0]
+            print("Número de sequência recebido:", seq_number_received)
+            modifiedMessage = ack_data[1]
+            print("Pacote recebido:", modifiedMessage, "\n")
         
-        time.sleep(1)
+            # Caso o ack_data não seja "ACK para o pacote enviado", reenvia o pacote
+            while seq_number_received != seq_number+1:
+                print(f"{ack_data} recebido.")
+                print("ACK não recebido. Reenviando pacote.\n")
+                clientSocket.sendto(pickle.dumps(data_to_send), (serverName, serverPort))
+                ack, serverAddress = clientSocket.recvfrom(2048)
+                ack_data = pickle.loads(ack)
+                checksum_received = ack_data[2]
+                print("Checksum recebida:", checksum_received)
+                seq_number_received = ack_data[0]
+                print("Número de sequência recebido:", seq_number_received)
+                modifiedMessage = ack_data[1]
+                print("Pacote recebido:", modifiedMessage, "\n")
+            if seq_number_received == seq_number+1:
+
+                print(f"{ack_data} recebido.")
+                # [0, 'GAB', 202]
+
+            timer.cancel()
+                        
+            if seq_number_received == seq_number+1:
+                if modifiedMessage != "ERROR":
+                    seq_number += 1
+            else:
+                print("Erro na soma de verificação ou número de sequência. Pacote ignorado.")
+            time.sleep(1)
+            
+    elif config == '1':
+        for packet in packets:
+            message_checksum = checksum(packet.encode())
+            data_to_send = [seq_number, packet, message_checksum]
+            clientSocket.sendto(pickle.dumps(data_to_send), (serverName, serverPort))
+            seq_number += 1
+                
+        while True:
+            ack, server_address = clientSocket.recvfrom(2048)
+            ack_data = pickle.loads(ack)
+            print(f"ACK recebido: {ack_data}")
+            # ACK x (pacote x recebido)
+            print("seq_number:", seq_number)
+
+            seq_number_received = ack_data[0]
+            if seq_number_received == seq_number:
+                print(f"ACK para pacote {seq_number} recebido.")
+                break
+            # ACK x (pacote x não recebido)
+            else:
+                # Dividindo "ACK x" para pegar o número do pacote
+                # response DATA = [2, 'L\x00', 76]
+                ack_number = int(ack_data[0])
+                print(f"ACK para pacote {ack_number} não recebido. Reenviando pacote.")
+                data_to_send = [int(ack_number), packets[int(ack_number)], checksum(packets[int(ack_number)].encode())]
+                clientSocket.sendto(pickle.dumps(data_to_send), (serverName, serverPort))
