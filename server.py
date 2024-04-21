@@ -121,7 +121,7 @@ while True:
         print(f"{ack} enviado para {clientAddress}")
 
     if ack.startswith("ACK") and config == '1':
-        if '\0' in response:
+        if (response and '\0' in response) or response == False:
             serverSocket.sendto(pickle.dumps(response_data), clientAddress)
             print("Dados enviados:", response_data, '\n')
             print(f"{ack} enviado para {clientAddress}")
