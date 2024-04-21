@@ -86,17 +86,20 @@ while True:
             data_to_send = [seq_number, packet, message_checksum]
             clientSocket.sendto(pickle.dumps(data_to_send), (serverName, serverPort))
             seq_number += 1
+
+        final_seq_number = seq_number
                 
         while True:
             ack, server_address = clientSocket.recvfrom(2048)
             ack_data = pickle.loads(ack)
-            print(f"ACK recebido: {ack_data}")
-            # ACK x (pacote x recebido)
-            print("seq_number:", seq_number)
-
             seq_number_received = ack_data[0]
-            if seq_number_received == seq_number:
+            print(f"Pacote recebido: {ack_data}")
+            # ACK x (pacote x recebido)
+            print("Número sequência recebido:", seq_number_received)
+
+            if seq_number_received == final_seq_number:
                 print(f"ACK para pacote {seq_number} recebido.")
+                seq_number = 0
                 break
             # ACK x (pacote x não recebido)
             else:
@@ -105,4 +108,5 @@ while True:
                 ack_number = int(ack_data[0])
                 print(f"ACK para pacote {ack_number} não recebido. Reenviando pacote.")
                 data_to_send = [int(ack_number), packets[int(ack_number)], checksum(packets[int(ack_number)].encode())]
+                print(f"Pacote reenviado: {data_to_send}\n")
                 clientSocket.sendto(pickle.dumps(data_to_send), (serverName, serverPort))
