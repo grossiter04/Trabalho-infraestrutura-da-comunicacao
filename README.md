@@ -17,8 +17,12 @@ Desenvolvido em linguagem Python, compatível com sistemas Unix e Windows;<br>
 <br/>
 
 
-- Então, o tipo de recepção deve ser escolhido, e em outro terminal, compilamos o arquivo client.py, deixando de lado o server.py enquanto ele roda através do comando python client.py:
-![image](https://github.com/grossiter04/Trabalho-infraestrutura-da-comunicacao/assets/117591564/614e1a7f-a167-4edf-b432-c04fad195029)
+- Então, o tipo de recepção deve ser escolhido, e em outro terminal, compilamos o arquivo client.py, em seguida escolhendo o mesmo tipo de recepção. ATENÇÃO: ISSO SIGNIFICA QUE O MESMO TIPO DE RECEPÇÃO '0' ou '1' DEVE SER ESCOLHIDO NA EXECUÇÃO DE SERVER.PY E DE CLIENT.PY.
+<br/>
+
+-  Deixamos, dessa forma, o server.py rodando paralalamente com client.py. Observe como escolhemos o mesmo tipo de recepção:
+![image](https://github.com/grossiter04/Trabalho-infraestrutura-da-comunicacao/assets/117591564/fc0670f9-6ca5-4c87-bbae-217f9f25151c)
+
 <br/>
 
 - Assim, compilamos o projeto, e podemos enviar mensagens de um cliente para um servidor. Para fechar a execução de client.py, podemos usar ctrl-C ou ctrl-D. Para fazer o mesmo com server.py, será necessário fechar o terminal. Para isso, basta apenas selecionar a lixeira no VS code. ![image](https://github.com/grossiter04/Trabalho-infraestrutura-da-comunicacao/assets/117591564/ef2e5330-3d81-4547-9e59-e72b3ac49db3)
