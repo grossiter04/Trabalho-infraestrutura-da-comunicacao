@@ -17,7 +17,8 @@ Desenvolvido em linguagem Python, compatível com sistemas Unix e Windows;<br>
 <br/>
 
 
-- Então, o tipo de recepção deve ser escolhido, e em outro terminal, compilamos o arquivo client.py, em seguida escolhendo o mesmo tipo de recepção. ATENÇÃO: ISSO SIGNIFICA QUE O MESMO TIPO DE RECEPÇÃO '0' ou '1' DEVE SER ESCOLHIDO NA EXECUÇÃO DE SERVER.PY E DE CLIENT.PY.
+- Então, o tipo de recepção deve ser escolhido, e em outro terminal, compilamos o arquivo client.py, em seguida escolhendo o mesmo tipo de recepção.
+- <b>ATENÇÃO: ISSO SIGNIFICA QUE O MESMO TIPO DE RECEPÇÃO '0' ou '1' DEVE SER ESCOLHIDO NA EXECUÇÃO DE SERVER.PY E DE CLIENT.PY.<b>
 <br/>
 
 -  Deixamos, dessa forma, o server.py rodando paralalamente com client.py. Observe como escolhemos o mesmo tipo de recepção:
