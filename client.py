@@ -24,6 +24,8 @@ seq_number = 0
 serverName = input("Digite o endereço IP do servidor (ou 'localhost' para se conectar localmente): ")
 config = input("Digite 0 para recepção individual e 1 para recepção em grupo. ")
 
+flag = True
+
 while True:
     message = input("Digite uma frase em minúsculas: ")
 
@@ -37,8 +39,13 @@ while True:
             message_checksum = checksum(packet.encode())
             data_to_send = [seq_number, packet, message_checksum]
             
-            timer = threading.Timer(5, timeout_handler)
-            timer.start()
+            if flag:
+                timer = threading.Timer(0, timeout_handler)
+                timer.start()
+                flag = False
+            else:
+                timer = threading.Timer(5, timeout_handler)
+                timer.start()
             
             clientSocket.sendto(pickle.dumps(data_to_send), (serverName, serverPort))
 
